@@ -1,6 +1,3 @@
-import Image from "next/image";
-import Link from "next/link";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -51,7 +48,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">About Me</h2>
           <p className="text-lg mb-6 text-gray-700 dark:text-gray-300">
-            I'm a passionate AI/ML enthusiast with a strong background in developing intelligent solutions. 
+            I&apos;m a passionate AI/ML enthusiast with a strong background in developing intelligent solutions. 
             My journey in artificial intelligence began with a fascination for how machines can learn and adapt, 
             and has evolved into a professional pursuit of building AI systems that solve real-world problems.
           </p>
@@ -189,7 +186,7 @@ export default function Home() {
               <div>
                 <h3 className="text-xl font-bold mb-4">Contact Information</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-6">
-                  I'm always open to discussing AI/ML projects, research opportunities, or potential collaborations.
+                  I&apos;m always open to discussing AI/ML projects, research opportunities, or potential collaborations.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center">
