@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { ThemeProvider } from "@/components/theme";
 import "./globals.css";
 
 const collapse = localFont({
@@ -66,6 +67,15 @@ export const metadata: Metadata = {
   },
 };
 
+const themeScript = `
+  try {
+    const savedTheme = localStorage.getItem("portfolio-theme");
+    document.documentElement.classList.toggle("dark", savedTheme !== "light");
+  } catch {
+    document.documentElement.classList.add("dark");
+  }
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -74,9 +84,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${collapse.variable} ${courierPrime.variable} ${rulesCompressed.variable} ${rulesExpanded.variable} ${mondwest.variable} ${sigurd.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

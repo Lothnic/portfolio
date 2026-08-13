@@ -15,28 +15,35 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-export function ThemeRoot({ children, className }: { children: ReactNode; className?: string }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const saved = localStorage.getItem("portfolio-theme") as Theme | null;
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTheme(saved);
-    }
+    const saved = localStorage.getItem("portfolio-theme");
+    const initialTheme = saved === "light" || saved === "dark" ? saved : "dark";
+
+    // The pre-paint script has already applied this theme to <html>.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTheme(initialTheme);
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
   }, []);
 
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
     localStorage.setItem("portfolio-theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
   };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className={cn("portfolio-web", theme, className)}>{children}</div>
+      {children}
     </ThemeContext.Provider>
   );
+}
+
+export function ThemeRoot({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("portfolio-web", className)}>{children}</div>;
 }
 
 export function ThemeToggle() {
