@@ -4,6 +4,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Keep App Router navigations from hard-cutting between independently painted pages. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: route-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: route-fade-in;
+}
+
+@keyframes route-fade-out {
+  to { opacity: 0.94; }
+}
+
+@keyframes route-fade-in {
+  from { opacity: 0.94; }
+}
+
 @theme inline {
   --color-background: var(--hw-bg);
   --color-foreground: var(--hw-fg);
@@ -134,7 +161,7 @@
   --hw-paper: #ffffff;
   --hw-dark: #0a0a0a;
 
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .dark .portfolio-web,
@@ -548,7 +575,13 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms;
+  }
+}
+
 .normal-case {
   text-transform: none !important;
 }
-

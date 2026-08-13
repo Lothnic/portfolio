@@ -10,6 +10,7 @@ export function useFooterReveal(): void {
     if (!scrollElement) return;
 
     let ticking = false;
+    let animationFrame = 0;
 
     const update = (): void => {
       const rect = scrollElement.getBoundingClientRect();
@@ -31,7 +32,7 @@ export function useFooterReveal(): void {
     const handleScroll = (): void => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => {
+      animationFrame = requestAnimationFrame(() => {
         update();
         ticking = false;
       });
@@ -52,6 +53,12 @@ export function useFooterReveal(): void {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
       resizeObserver.disconnect();
+      cancelAnimationFrame(animationFrame);
+
+      // Do not leak the previous page's reveal state into the next route.
+      root.style.removeProperty("--hw-footer-opacity");
+      root.style.removeProperty("--hw-footer-pe");
+      root.style.removeProperty("--hw-scroll-pe");
     };
   }, []);
 }
