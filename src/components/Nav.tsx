@@ -1,5 +1,6 @@
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
 import { Sun, Moon } from "lucide-react";
+import Link from "next/link";
 
 export function Nav({
   theme,
@@ -20,32 +21,32 @@ export function Nav({
       className="flex md:grid md:grid-cols-3 items-center justify-between font-display text-[clamp(0.8rem,calc(22*var(--u)),1.35rem)] font-extrabold tracking-[0.03em] uppercase text-[var(--hw-fg)]"
     >
       <div className="hidden md:flex items-center justify-start" style={{ gap: "clamp(16px, calc(32 * var(--u)), 36px)" }}>
-        <a
+        <Link
           href="/#downloads"
           className="hover:underline underline-offset-[0.3em] py-[calc(14*var(--u))] -my-[calc(14*var(--u))]"
         >
           Overview
-        </a>
-        <a
+        </Link>
+        <Link
           href="/#projects"
           className="hover:underline underline-offset-[0.3em] py-[calc(14*var(--u))] -my-[calc(14*var(--u))]"
         >
           Projects
-        </a>
-        <a
+        </Link>
+        <Link
           href="/blog"
           className="hover:underline underline-offset-[0.3em] py-[calc(14*var(--u))] -my-[calc(14*var(--u))]"
         >
           Blogs
-        </a>
+        </Link>
       </div>
 
-      <a
+      <Link
         href="/"
         className="flex flex-row items-center justify-center whitespace-nowrap text-center font-display text-[clamp(1.1rem,calc(40*var(--u)),2.5rem)] font-extrabold tracking-[0.03em] leading-none hover:no-underline justify-self-center"
       >
         LOTH<span style={{ display: "inline-block", transform: "scaleX(-1)" }}>N</span>IC
-      </a>
+      </Link>
 
       <div className="flex items-center justify-end justify-self-end" style={{ gap: "clamp(12px, calc(28 * var(--u)), 24px)" }}>
         <a

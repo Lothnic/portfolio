@@ -1,32 +1,13 @@
-"use client";
-
 import Link from "next/link";
 import { posts } from "@/data/posts";
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
 import { GrainOverlay } from "@/components/GrainOverlay";
-import { HeroCanvas } from "@/components/HeroCanvas";
-import { Sun, Moon } from "lucide-react";
+import { ThemeRoot, ThemeToggle } from "@/components/theme";
+import { ThemedHeroCanvas } from "@/components/ThemedHeroCanvas";
 
 export default function BlogIndex() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("portfolio-theme") as "light" | "dark";
-    if (saved) {
-      setTheme(saved);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    localStorage.setItem("portfolio-theme", next);
-  };
-
   return (
-    <div className={cn("portfolio-web min-h-[100dvh] bg-[var(--hw-bg)]", theme)}>
-      <HeroCanvas theme={theme} />
+    <ThemeRoot className="min-h-[100dvh] bg-[var(--hw-bg)]">
+      <ThemedHeroCanvas />
       <main className="relative z-2 mx-auto max-w-[980px] px-[var(--hw-gutter)] py-[calc(60*var(--u))]">
         {/* Blog Header Navigation */}
         <header className="flex items-center justify-between border-b border-[var(--hw-fg)]/10 pb-[calc(20*var(--u))] mb-[calc(60*var(--u))]">
@@ -36,17 +17,7 @@ export default function BlogIndex() {
           >
             [← home]
           </Link>
-          <button
-            onClick={toggleTheme}
-            aria-label="Toggle Theme"
-            className="flex items-center justify-center opacity-70 transition-opacity duration-200 ease-out hover:opacity-100 cursor-pointer p-[calc(4*var(--u))]"
-          >
-            {theme === "light" ? (
-              <Moon style={{ height: "calc(24 * var(--u))", width: "auto" }} />
-            ) : (
-              <Sun style={{ height: "calc(24 * var(--u))", width: "auto" }} />
-            )}
-          </button>
+          <ThemeToggle />
         </header>
 
         {/* Title Section */}
@@ -100,6 +71,6 @@ export default function BlogIndex() {
 
       <GrainOverlay />
       <div className="hw-frame" aria-hidden="true" />
-    </div>
+    </ThemeRoot>
   );
 }

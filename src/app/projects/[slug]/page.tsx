@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GrainOverlay } from "@/components/GrainOverlay";
-import { HeroCanvas } from "@/components/HeroCanvas";
+import { ThemeRoot, ThemeToggle } from "@/components/theme";
+import { ThemedHeroCanvas } from "@/components/ThemedHeroCanvas";
 import { projects } from "@/data/projects";
 
 export function generateStaticParams() {
@@ -21,8 +22,8 @@ export default async function ProjectPage({
   }
 
   return (
-    <div className="portfolio-web dark min-h-[100dvh] bg-[var(--hw-bg)]">
-      <HeroCanvas theme="dark" />
+    <ThemeRoot className="min-h-[100dvh] bg-[var(--hw-bg)]">
+      <ThemedHeroCanvas />
       <main className="relative z-2 mx-auto flex min-h-[100dvh] max-w-[1200px] flex-col px-[var(--hw-gutter)] py-[calc(44*var(--u))]">
         <header className="flex items-center justify-between border-b border-[var(--hw-fg)]/10 pb-[calc(18*var(--u))]">
           <nav className="hw-mono flex items-center gap-[calc(24*var(--u))] text-[var(--hw-text-eyebrow)] tracking-wider">
@@ -36,9 +37,12 @@ export default async function ProjectPage({
               [notes]
             </Link>
           </nav>
-          <p className="hw-mono text-[var(--hw-text-eyebrow)] text-[var(--hw-accent)]">
-            #{project.number}
-          </p>
+          <div className="flex items-center gap-[calc(24*var(--u))]">
+            <p className="hw-mono text-[var(--hw-text-eyebrow)] text-[var(--hw-accent)]">
+              #{project.number}
+            </p>
+            <ThemeToggle />
+          </div>
         </header>
 
         <article className="grid flex-1 grid-cols-1 gap-[calc(72*var(--u))] py-[calc(80*var(--u))] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start">
@@ -93,6 +97,6 @@ export default async function ProjectPage({
       </main>
       <GrainOverlay />
       <div className="hw-frame" aria-hidden="true" />
-    </div>
+    </ThemeRoot>
   );
 }

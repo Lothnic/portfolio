@@ -176,6 +176,22 @@
   color: var(--hw-bg);
 }
 
+.portfolio-web code:not(pre code) {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+  background: var(--hw-paper);
+  border: 1px solid color-mix(in srgb, var(--hw-fg) 12%, transparent);
+  padding: 0.15em 0.4em;
+  border-radius: 0.2rem;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.portfolio-web .katex,
+.portfolio-web .katex-display {
+  text-transform: none;
+}
+
 @media (max-width: 767px) {
   .portfolio-web {
     --u: calc(100cqw / 760);

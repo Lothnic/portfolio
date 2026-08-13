@@ -30,7 +30,7 @@ export function HeroHeader() {
 
         {/* Subtext info */}
         <p className="font-roboto-mono text-[clamp(0.75rem,calc(15*var(--u)),0.9rem)] text-[var(--hw-fg)] opacity-65 normal-case mb-10 leading-relaxed max-w-[50ch]">
-          currently intern @ <a target="_blank" rel="noopener noreferrer" className="text-[var(--hw-fg)] hover:text-[var(--hw-accent)] font-medium border-b border-[var(--hw-fg)]/30 hover:border-[var(--hw-accent)] pb-0.5 transition-colors">iit rpr</a> · based in India <br></br> open to opportunities
+          currently intern @ <a href="https://www.iitrpr.ac.in/" target="_blank" rel="noopener noreferrer" className="text-[var(--hw-fg)] hover:text-[var(--hw-accent)] font-medium border-b border-[var(--hw-fg)]/30 hover:border-[var(--hw-accent)] pb-0.5 transition-colors">iit rpr</a> · based in India <br></br> open to opportunities
         </p>
 
         {/* CTA Link list */}
