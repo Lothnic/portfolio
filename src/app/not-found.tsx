@@ -5,7 +5,7 @@ import { HeroCanvas } from "@/components/HeroCanvas";
 export default function NotFound() {
   return (
     <div className="portfolio-web dark min-h-[100dvh] bg-[var(--hw-bg)]">
-      <HeroCanvas theme="dark" />
+      <HeroCanvas theme="dark" quiet />
       <main className="relative z-2 flex min-h-[100dvh] items-center justify-center px-[var(--hw-gutter)] py-[calc(80*var(--u))] text-center">
         <section className="flex max-w-[760px] flex-col items-center gap-[calc(22*var(--u))]">
           <p className="hw-mono text-[var(--hw-text-eyebrow)] tracking-[0.18em] text-[var(--hw-accent)]">

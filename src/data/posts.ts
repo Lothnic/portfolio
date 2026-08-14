@@ -1,3 +1,6 @@
+// Auto-generated file. Do not edit directly.
+// Compiled from content/posts/*.md by scripts/compile-posts.mjs
+
 export interface Post {
   slug: string;
   title: string;
@@ -5,60 +8,19 @@ export interface Post {
   year: string;
   category: string;
   excerpt: string;
+  image: string;
   content: string;
 }
 
 export const posts: Post[] = [
   {
-    slug: "vllmini_architecture",
-    title: "vllmini: Building a Minimalist PagedAttention and KV Cache Engine",
-    date: "2026-01-10",
-    year: "2026",
-    category: "systems",
-    excerpt: "Developing a clean C++/CUDA library for token generation, covering page tables, virtual memory metaphors for GPU allocation, and block size tradeoffs.",
-    content: `Memory bandwidth is the primary bottleneck during LLM inference. In the generation phase, the model retrieves the Key-Value (KV) cache of all past tokens at every step to calculate attention weights.
-
-In typical setups, memory allocation for this KV cache is pre-allocated statically for the maximum sequence length, leading to severe fragmentation (known as *internal fragmentation*). **vllmini** is a lightweight engine designed to solve this by bringing virtual memory ideas directly to GPU memory management.
-
-### PagedAttention Metaphor
-
-Rather than allocating contiguous physical memory, vllmini splits the KV cache of a sequence into fixed-size blocks. These blocks are mapped to non-contiguous physical pages on the GPU using a page table:
-
-\`\`\`
-Logical Space:  [Block 0] -> [Block 1] -> [Block 2]
-                     |            |            |
-                     v            v            v
-Physical Pages:  [Page 14]    [Page 89]    [Page 3]
-\`\`\`
-
-At execution time, the custom CUDA kernel lookup resolves the logical token offset into the physical page offsets on the fly.
-
-### The CUDA Block Kernel
-
-In vllmini, the custom kernel reads from the page table using a 3D lookup (Batch ID, Head ID, Block Offset):
-
-\`\`\`cuda
-__global__ void paged_attention_kernel(
-    float* __restrict__ out,
-    const float* __restrict__ q,
-    const float* __restrict__ k_cache,
-    const float* __restrict__ v_cache,
-    const int* __restrict__ block_tables,
-    const int* __restrict__ context_lens,
-    const int block_size,
-    const int num_heads,
-    const int head_size
-) {
-    // Tiled execution logic for fetching K/V elements from non-contiguous pages
-    int tid = threadIdx.x;
-    int head_idx = blockIdx.y;
-    int batch_idx = blockIdx.x;
-    
-    // Resolve page locations and compute dot product attention scores...
-}
-\`\`\`
-
-By decoupling logical memory from physical allocation, vllmini achieves near-zero memory waste, allowing batch sizes to scale up to 4x on resource-constrained devices.
-`
+    "slug": "vllmini_architecture",
+    "title": "vllmini: Building a Minimal LLM Inference Engine in PyTorch",
+    "date": "2026-04-01",
+    "year": "2026",
+    "category": "systems",
+    "excerpt": "A from-scratch PyTorch inference engine for Llama, Qwen, and Mistral — covering meta-device weight loading, FlashAttention, KV caching, streaming generation, and 4-bit NF4 quantization.",
+    "image": "",
+    "content": "**vllmini** is my take on the  implementation of a vLLM-style inference engine,  which is built from scratch in PyTorch to help me understand what actually happens inside a modern LLM serving stack at the basic level. It currently supports Llama 2/3 and derivatives, Qwen 2/3, and Mistral with FlashAttention, KV caching, streaming output, a stateless sampler, and optional 4-bit NF4 quantization.\n\nThe whole engine is a few hundred lines of Python. There's no `transformers` model class underneath and the decoder is written by hand.\n\n### The layering\n\nThe project splits into three layers that mirror how production engines are organized:\n\n```\nvllmini/\n├── main.py                  # CLI chat loop (multi-turn, streaming, argparse)\n├── benchmark.py             # Performance harness (TTFT, ITL, tok/s, VRAM)\n├── engine/\n│   ├── generator.py         # Single-sequence generation loop (yield-based)\n│   ├── sampler.py           # Stateless sampler (temperature, top-k, top-p and greedy)\n│   └── sampling_params.py   # SamplingParams dataclass - config travels with the request\n└── models/\n    ├── base.py              # CausalLM ABC - the engine never looks inside the model\n    ├── attention.py         # Attention + FlashAttention (SDPA) + RoPE utilities\n    ├── llama.py             # LlamaConfig, RMSNorm, RotaryEmbedding, MLP, TransformerBlock, LlamaForCausalLM\n    ├── qwen3.py             # QwenAttention (+ QK-norm), QwenTransformerBlock, QwenForCausalLM\n    └── weight_loader.py     # HF download, config parse, meta-device init, weight mapping, model registry\n```\n\nThe key interface is the `CausalLM` ABC in `models/base.py`. It defines one `forward(input_ids, position_ids, past_key_values) -> (logits, present_key_values)` contract, and everything above it such as generator, sampler, CLI treats the model as a black box. Adding a new architecture means writing a new model class and registering it in the loader; the engine stays the same.\n\n### Loading weights without blowing up memory\n\n#### Small Glossary on weights of models\nAlmost everything (parameters, gradients, activations optimizer states) are stored as floating point numbers. Majorly these are used during LLM training and inference : \n\n- FP32 - Full precision with 32 bits (4 Bytes) per value/number\n- FP16 - half precision with 16 bits (2 Bytes) per value/number\n- BF16 - **Brain Floating Point 16**, 16 bits (2 bytes) per value. \n\n<details>\n<summary>More Info About BF16</summary>\n\nDeveloped by Google Brain. It keeps the same 8-bit exponent as FP32 (so the same dynamic range) but truncates the mantissa to 7 bits (vs. FP16's 10 bits). The tradeoff: slightly lower precision for individual values, but far fewer numerical stability issues. BF16 is often \"free\" on modern NVIDIA GPUs (Ampere and newer) and AMD MI200+ because the hardware converts on-the-fly. For inference, it's usually indistinguishable from FP32 in output quality while giving you the full 2× memory savings.\n\n</details>\n\n- INT8 - 8 bits (1 Byte) per value/number\n\nMemory usage can be calculated as\n\n```\nget_memory_usage(parameters) = parameters * Bytes_per_number\n```\n\nSp loading a 7B model naively means holding a CPU copy of the FP32 checkpoint while also allocating the GPU copy which doubles the peak memory, which OOMs an 8GB card as 7B\\*4 bytes = 28 GB of VRAM . The loader fixes this in two steps:\n\n1. **Meta-device init** : the model is instantiated inside `torch.device(\"meta\")`, so the full graph exists (correct shapes, dtypes) but the memory allocated is zero.\n\n2. **Sharded safetensors load with `assign=True`** : shards are streamed one at a time and written directly into the meta tensors with `load_state_dict(assign=True)`, which skips the intermediate copy.\n\n```python\nwith torch.device(\"meta\"):\n    model = model_class(config)          # zero-alloc graph\n\nstate_dict = {}\nfor shard in shard_paths:                # one shard at a time\n    state_dict.update(safetensors.torch.load_file(shard))\nmodel.load_state_dict(state_dict, assign=True)  # direct write, no extra copy\n```\n\nA `MODEL_REGISTRY` is used to map HF `model_type` strings (\"llama\", \"qwen3\", \"mistral\") to model classes, and a key-remapping step translates HF checkpoint names (`model.layers.0.self_attn.q_proj.weight`) into the engine's internal names (`layers.0.attn.q_proj.weight`).\n\n### Attention and the KV cache\n\nAttention is where the real serving magic lives. The `FlashAttention` class is a thin subclass of `Attention` that overrides only the core scoring step with `F.scaled_dot_product_attention` — PyTorch's fused attention that dispatches to FlashAttention-2 kernels on CUDA. The RoPE buffers (`cos_cached`/`sin_cached`) are computed once in a single `RotaryEmbedding` instance and **shared across all layers**, so 32+ layers don't each hold their own copy.\n\nThe KV cache is a plain list of per-layer `(k, v)` tuples threaded through the forward pass. On the first call the whole prompt is prefilled; every later call passes only the last token plus the cache:\n\n```python\nif past_key_values is None:\n    logits, past_key_values = self.model(input_ids, position_ids=None)\nelse:\n    logits, past_key_values = self.model(input_ids[:, -1:], position_ids=None, past_key_values=past_key_values)\n```\n\nQwen3 was the interesting one to add: it's structurally Llama but with QK-norm — RMSNorm applied to the Q and K heads *before* RoPE — so `QwenAttention` subclasses the Llama attention and just inserts the two norm layers.\n\n### Streaming generation with `yield`\n\nThe generator is a Python generator: `generate()` lazily produces one token at a time and suspends between tokens, so the caller gets real-time streaming for free — the same mechanism production servers use for SSE. The subtle bug it had to solve: decoding single tokens individually loses SentencePiece's `▁` space-prefix, turning \"Hello world\" into \"Helloworld\". The fix is to decode the full generated sequence at each step and yield only the diff:\n\n```python\nfull_text = self.tokenizer.decode(input_ids[0, prompt_len:], skip_special_tokens=True)\nnew_text = full_text[len(prev_text):]\nprev_text = full_text\nif new_text:\n    yield new_text\n```\n\n### A stateless sampler\n\nThe sampler used to hold `temperature`/`top_p`/`top_k` as constructor arguments. That breaks under continuous batching, where different requests in the same batch need different sampling configs. So `SamplingParams` became a dataclass that travels *with the request*, and `Sampler.sample(logits, params)` takes the config at call time — one shared sampler instance, per-request config:\n\n```python\n@dataclass\nclass SamplingParams:\n    temperature: float = 1.0\n    top_p: float = 1.0\n    top_k: int = 0\n```\n\nValidation lives in `__post_init__`, so a bad config (`temperature=-1`) raises at construction instead of silently corrupting sampling. This is the design that makes the future scheduler (continuous batching) a drop-in: each `SequenceGroup` carries its own `SamplingParams`.\n\n### 4-bit NF4 quantization\n\nTo run 7B models on an 8GB GPU, `--quantize` swaps every attention and MLP projection from `nn.Linear` to `bitsandbytes.nn.Linear4bit` via a factory in `models/base.py`:\n\n```python\ndef get_linear_layer(in_features, out_features, bias, quantize=False):\n    if quantize:\n        import bitsandbytes as bnb\n        return bnb.nn.Linear4bit(\n            in_features, out_features, bias=bias,\n            compute_dtype=torch.bfloat16, quant_type=\"nf4\",\n        )\n    return nn.Linear(in_features, out_features, bias=bias)\n```\n\nThe key insight: 4-bit isn't truncation — it's a compressed encoding. Each weight is stored as a 4-bit index into a per-block codebook, and dequantized on the fly during matmuls (`dequantized = codebook[index] × scale + zero_point`). Weights are *stored* in 4-bit but *computed* in BF16. The quantized path also loads shard-by-shard with aggressive cleanup (`del` + `gc.collect()` + `cuda.empty_cache()`) because per-parameter quantization on a 7B model is tight on 8GB. Embeddings, RMSNorm, and the LM head stay full precision — standard practice, since the bulk of parameters live in the projections.\n\n### Benchmarking it\n\n`benchmark.py` measures what actually matters for serving:\n\n- **TTFT** — time to first token (the prefill forward pass)\n- **Avg ITL** — inter-token latency across the decode loop\n- **Throughput** — tokens/sec end to end\n- **Peak VRAM** — `torch.cuda.max_memory_allocated()`\n\nIt runs a short warmup generation first to JIT the SDPA kernels, then times a greedy run for consistency.\n\n### What's next\n\nThe engine is single-sequence today; the roadmap is a staged build-out: continuous batching with a scheduler (Phase 2), then **PagedAttention** — the block-based KV cache with a block table that's vLLM's signature innovation (Phase 3), then an OpenAI-compatible HTTP API, speculative decoding, and tensor parallelism. Each phase reuses what's already there: the stateless sampler feeds the scheduler, the generator becomes the decode step, and the KV cache gets paged. The interesting part of this project is that it's the same architecture as production vLLM — just small enough to read in an afternoon."
   }
 ];

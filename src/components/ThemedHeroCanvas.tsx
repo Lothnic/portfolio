@@ -5,5 +5,6 @@ import { HeroCanvas } from "./HeroCanvas";
 
 export function ThemedHeroCanvas() {
   const { theme } = useTheme();
-  return <HeroCanvas theme={theme} />;
+  // Reading/content pages get the quiet backdrop — sun + ripples only, no drifting particles.
+  return <HeroCanvas theme={theme} quiet />;
 }

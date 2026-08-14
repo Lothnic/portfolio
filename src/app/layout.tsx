@@ -1,7 +1,29 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Fraunces, Inter, Roboto_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme";
 import "./globals.css";
+
+// Google Fonts are loaded through next/font (not a CSS @import) — Turbopack
+// drops remote @imports, so they'd silently fall back to system fonts.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  axes: ["opsz"], // optical sizing: legible text cut at body sizes, display cut for headings
+  display: "swap",
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  variable: "--font-roboto-mono",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 const collapse = localFont({
   src: [
@@ -54,6 +76,7 @@ const sigurd = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://lothnic.dev"),
   title: "Mayank Joshi | Portfolio",
   description: "Systems & machine learning engineer portfolio of Mayank Joshi",
   openGraph: {
@@ -85,7 +108,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${collapse.variable} ${courierPrime.variable} ${rulesCompressed.variable} ${rulesExpanded.variable} ${mondwest.variable} ${sigurd.variable} h-full antialiased`}
+      className={`${collapse.variable} ${courierPrime.variable} ${rulesCompressed.variable} ${rulesExpanded.variable} ${mondwest.variable} ${sigurd.variable} ${fraunces.variable} ${robotoMono.variable} ${inter.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

@@ -1,56 +1,46 @@
 import Link from "next/link";
 import { posts } from "@/data/posts";
 import { GrainOverlay } from "@/components/GrainOverlay";
-import { ThemeRoot, ThemeToggle } from "@/components/theme";
+import { ThemeRoot } from "@/components/theme";
 import { ThemedHeroCanvas } from "@/components/ThemedHeroCanvas";
+import { BlogHeader } from "@/components/BlogHeader";
 
 export default function BlogIndex() {
   return (
-    <ThemeRoot className="min-h-[100dvh] bg-[var(--hw-bg)]">
+    <ThemeRoot className="blog-essay min-h-[100dvh] bg-[var(--hw-bg)]">
       <ThemedHeroCanvas />
-      <main className="relative z-2 mx-auto max-w-[980px] px-[var(--hw-gutter)] py-[calc(60*var(--u))]">
-        {/* Blog Header Navigation */}
-        <header className="flex items-center justify-between border-b border-[var(--hw-fg)]/10 pb-[calc(20*var(--u))] mb-[calc(60*var(--u))]">
-          <Link
-            href="/"
-            className="hw-mono text-[var(--hw-text-eyebrow)] tracking-wider hover:text-[var(--hw-accent)] transition-colors normal-case"
-          >
-            [← home]
-          </Link>
-          <ThemeToggle />
-        </header>
+      <main className="relative z-2 mx-auto max-w-[1080px] px-[var(--hw-gutter)] py-[calc(30*var(--u))]">
+        <BlogHeader />
 
         {/* Title Section */}
-        <div className="flex flex-col gap-[calc(8*var(--u))] mb-[calc(60*var(--u))]">
-          <h1 className="font-fraunces font-medium text-[clamp(2rem,calc(60*var(--u)),3.5rem)] leading-none text-[var(--hw-fg)] tracking-[-0.015em] normal-case">
+        <div className="flex flex-col gap-[calc(12*var(--u))] mt-[calc(90*var(--u))] mb-[calc(70*var(--u))]">
+          <h1 className="font-fraunces font-medium text-[clamp(2.4rem,calc(72*var(--u)),4rem)] leading-none text-[var(--hw-fg)] tracking-[-0.015em] normal-case">
             notes
           </h1>
-          <p className="font-roboto-mono text-[clamp(0.85rem,calc(18*var(--u)),1.05rem)] text-[var(--hw-fg)] opacity-70 tracking-wide normal-case">
+          <p className="font-fraunces italic text-[clamp(1rem,calc(22*var(--u)),1.25rem)] text-[var(--hw-fg)] opacity-60 normal-case">
             writing about language models, CUDA, and systems engineering
           </p>
         </div>
 
         {/* Dedicated Posts Timeline */}
-        <div className="flex flex-col gap-[calc(40*var(--u))]">
+        <div className="flex flex-col">
           {posts.map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group flex flex-col md:grid md:grid-cols-4 items-baseline py-[calc(20*var(--u))] border-b border-[var(--hw-fg)]/5 hover:border-[var(--hw-accent)]/30 transition-colors gap-[calc(8*var(--u))] md:gap-0"
+              className="group flex flex-col gap-[calc(10*var(--u))] py-[calc(28*var(--u))] border-b border-[var(--hw-fg)]/10 transition-colors"
             >
-              {/* Year & Category */}
-              <div className="flex flex-row md:flex-col gap-2 md:gap-[calc(4*var(--u))] hw-mono text-[var(--hw-text-eyebrow)] opacity-60 group-hover:opacity-100 group-hover:text-[var(--hw-accent)] transition-all">
-                <span>{post.year}</span>
-                <span className="md:hidden opacity-40">·</span>
-                <span className="lowercase">{post.category}</span>
+              <div className="flex items-center gap-[calc(14*var(--u))] hw-mono text-[var(--hw-text-eyebrow)] opacity-50 normal-case">
+                <span>{post.date}</span>
+                <span>·</span>
+                <span>{post.category}</span>
               </div>
 
-              {/* Title & Excerpt */}
-              <div className="md:col-span-3 flex flex-col gap-[calc(10*var(--u))]">
-                <h2 className="font-fraunces font-medium text-[clamp(1.2rem,calc(36*var(--u)),1.9rem)] leading-tight text-[var(--hw-fg)] group-hover:text-[var(--hw-accent)] transition-colors normal-case">
+              <div className="flex flex-col gap-[calc(8*var(--u))]">
+                <h2 className="font-fraunces font-medium text-[clamp(1.3rem,calc(38*var(--u)),1.9rem)] leading-tight text-[var(--hw-fg)] group-hover:text-[var(--hw-accent)] transition-colors normal-case">
                   {post.title}
                 </h2>
-                <p className="font-roboto-mono text-[clamp(0.75rem,calc(16*var(--u)),0.92rem)] text-[var(--hw-fg)] opacity-65 group-hover:opacity-85 transition-opacity normal-case leading-relaxed">
+                <p className="font-roboto-mono text-[clamp(0.85rem,calc(17*var(--u)),1rem)] leading-relaxed text-[var(--hw-fg)] opacity-75 group-hover:opacity-90 transition-opacity normal-case">
                   {post.excerpt}
                 </p>
               </div>

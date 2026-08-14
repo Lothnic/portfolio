@@ -4,9 +4,11 @@ import { useEffect, useRef } from "react";
 
 type HeroCanvasProps = {
   theme: "light" | "dark";
+  /** Skip the drifting petal/spark particles — keeps only the sun glow + ripples. */
+  quiet?: boolean;
 };
 
-export function HeroCanvas({ theme }: HeroCanvasProps) {
+export function HeroCanvas({ theme, quiet = false }: HeroCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -76,6 +78,7 @@ export function HeroCanvas({ theme }: HeroCanvasProps) {
 
     const seedParticles = () => {
       particles.length = 0;
+      if (quiet) return; // no drifting particles on reading pages
       const count = Math.min(60, Math.floor((W * H) / 24000));
       for (let i = 0; i < count; i++) {
         particles.push(makeParticle(true));
