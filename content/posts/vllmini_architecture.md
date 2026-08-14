@@ -39,15 +39,7 @@ Almost everything (parameters, gradients, activations optimizer states) are stor
 
 - FP32 - Full precision with 32 bits (4 Bytes) per value/number
 - FP16 - half precision with 16 bits (2 Bytes) per value/number
-- BF16 - **Brain Floating Point 16**, 16 bits (2 bytes) per value. 
-
-<details>
-<summary>More Info About BF16</summary>
-
-Developed by Google Brain. It keeps the same 8-bit exponent as FP32 (so the same dynamic range) but truncates the mantissa to 7 bits (vs. FP16's 10 bits). The tradeoff: slightly lower precision for individual values, but far fewer numerical stability issues. BF16 is often "free" on modern NVIDIA GPUs (Ampere and newer) and AMD MI200+ because the hardware converts on-the-fly. For inference, it's usually indistinguishable from FP32 in output quality while giving you the full 2× memory savings.
-
-</details>
-
+- BF16 - **Brain Floating Point 16**, 16 bits (2 bytes) per value.
 - INT8 - 8 bits (1 Byte) per value/number
 
 Memory usage can be calculated as
